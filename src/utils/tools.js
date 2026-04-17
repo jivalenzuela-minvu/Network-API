@@ -1,4 +1,7 @@
 import { exec } from "node:child_process"
+import { performance } from "perf_hooks"
+
+import ping from "ping"
 
 /**
  * Obtiene el nombre de la máquina a través del filtrado de la salida del comando.
@@ -36,25 +39,50 @@ export const getUser = (stdout) => {
 }
 
 /**
- * Obtiene la información de una IP.
+ * Obtiene la información de una dirección IP.
  * 
  * @param {string} ip Dirección IP a consultar.
  */
 export const getIpInfo = (ip) => new Promise((resolve) => {
-    exec(`nbtstat -A ${ip}`, (_, stdout) => {
-        const mac = getMac(stdout)
-        const hostname = getHostname(stdout)
-
-        if (mac === "-" || hostname === "-") {
-            resolve({ ip, hostname, mac, user: "-" })
+    const start = performance.now()
+    
+    exec(`nbtstat -A ${ip}`, { timeout: 30000 } ,(error, stdout) => {
+        if (error) {
+            resolve({ ip, mac: "-", hostname: "-", user: "-" })
             
             return
         }
 
-        exec(`query user /server:${hostname}`, (_, stdout) => {
+        const mac = getMac(stdout)
+        const hostname = getHostname(stdout)
+
+        if (mac === "-" || hostname === "-") {
+            resolve({ ip, mac, hostname, user: "-" })
+            
+            return
+        }
+
+        exec(`query user /server:${hostname}`, { timeout: 30000 }, (_, stdout) => {
             const user = getUser(stdout)
 
-            resolve({ ip, hostname, mac, user })
+            const duration = performance.now() - start
+
+            resolve({ ip, mac, hostname, user, duration })
         })
+    })
+})
+
+/**
+ * Obtiene los datos de un ping a una dirección IP.
+ * 
+ * @param {string} ip Dirección IP a realizar el ping.
+ */
+export const getPing = (ip) => new Promise((resolve) => {
+    const start = performance.now()
+
+    ping.promise.probe(ip).then((data) => {
+        const duration = performance.now() - start
+
+        resolve({ ping: data, duration })
     })
 })

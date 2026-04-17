@@ -1,7 +1,6 @@
 import { Router } from "express"
 
-import ping from "ping"
-
+import { getPing } from "./../utils/tools.js"
 import { getIpInfo } from "./../utils/tools.js"
 
 import { IP_LIMIT } from "./../utils/consts.js"
@@ -16,8 +15,7 @@ router.get("/api/ping", async (request, response) => {
         const pendingPromises = []
 
         for (let i = 1; i <= IP_LIMIT; i++) {
-            if (i === 219) continue
-            const pendingPromise = ping.promise.probe(`10.208.31.${i}`)
+            const pendingPromise = getPing(`10.208.31.${i}`)
 
             pendingPromises.push(pendingPromise)
         }
@@ -44,10 +42,11 @@ router.get("/api/ping/:ip", async (request, response) => {
     try {
         const { ip } = request.params
 
-        const res = await ping.promise.probe(ip)
+        const { ping, duration } = await getPing(ip)
 
         response.status(200).json({
-            alive: res.alive
+            ping,
+            duration
         })
     } catch (error) {
         console.log(error)
@@ -67,7 +66,6 @@ router.get("/api/net", async (request, response) => {
         const pendingPromises = []
 
         for (let i = 1; i <= IP_LIMIT; i++) {
-            if (i === 219) continue
             const pendingPromise = getIpInfo(`10.208.31.${i}`)
 
             pendingPromises.push(pendingPromise)
@@ -76,7 +74,7 @@ router.get("/api/net", async (request, response) => {
         const resolvedPromises = await Promise.all(pendingPromises)
 
         response.status(200).json({
-            netInfo: resolvedPromises
+            info: resolvedPromises
         })
     } catch (error) {
         console.log(error)
@@ -95,10 +93,10 @@ router.get("/api/net/:ip", async (request, response) => {
     try {
         const { ip } = request.params
 
-        const netInfo = await getIpInfo(ip)
+        const ipInfo = await getIpInfo(ip)
 
         response.status(200).json({
-            netInfo
+            ...ipInfo
         })
     } catch (error) {
         console.log(error)
