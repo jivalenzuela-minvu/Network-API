@@ -1,23 +1,25 @@
-import { exec } from "node:child_process"
-import { performance } from "perf_hooks"
+import { execFile } from "node:child_process"
+import { performance } from "node:perf_hooks"
 
 import ping from "ping"
 
 /**
- * Obtiene el nombre de la máquina a través del filtrado de la salida del comando.
+ * Obtiene el nombre de host del PC a través del filtrado de la salida del comando.
  * 
  * @param {string} stdout Salida del comando.
  */
 export const getHostname = (stdout) => {
-    const splittedStdout = stdout.split("<20>")[0].split(" ").filter((_) => _)
+    const splittedStdout = stdout.split("<20>")[0].split(" ").filter(Boolean)
 
-    const hostname = splittedStdout[splittedStdout.length - 1].includes("encontrado") ? "-" : splittedStdout[splittedStdout.length - 1]
+    const findedHostname = splittedStdout[splittedStdout.length - 1]
+
+    const hostname = (findedHostname.includes("encontrado")) ? "-" : findedHostname
 
     return hostname
 }
 
 /**
- * Obtiene la dirección MAC de la máquina a través del filtrado de la salida del comando.
+ * Obtiene la dirección MAC del PC a través del filtrado de la salida del comando.
  * 
  * @param {string} stdout Salida del comando.
  */
@@ -28,12 +30,12 @@ export const getMac = (stdout) => {
 }
 
 /**
- * Obtiene el usuario activo en la máquina a través del filtrado de la salida del comando.
+ * Obtiene el usuario activo del PC a través del filtrado de la salida del comando.
  * 
  * @param {string} stdout Salida del comando.
  */
 export const getUser = (stdout) => {
-    const user = stdout.split(" ")[24] || "-"
+    const user = stdout.split(" ")[24] ?? "-"
 
     return user
 }
@@ -46,7 +48,7 @@ export const getUser = (stdout) => {
 export const getIpInfo = (ip) => new Promise((resolve) => {
     const start = performance.now()
     
-    exec(`nbtstat -A ${ip}`, { timeout: 30000 } ,(error, stdout) => {
+    execFile("nbtstat", ["-A", ip], { timeout: 30000 }, (error, stdout) => {
         if (error) {
             resolve({ ip, mac: "-", hostname: "-", user: "-" })
             
@@ -62,7 +64,7 @@ export const getIpInfo = (ip) => new Promise((resolve) => {
             return
         }
 
-        exec(`query user /server:${hostname}`, { timeout: 30000 }, (_, stdout) => {
+        execFile("query", ["user", `/server:${hostname}`], { timeout: 30000 }, (error, stdout) => {
             const user = getUser(stdout)
 
             const duration = performance.now() - start
