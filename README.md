@@ -27,7 +27,7 @@
 #### Responses
 > | Código HTTP | Respuesta                                                |
 > | ----------- | -------------------------------------------------------- |
-> | `200`       | `{"alive": boolean }`                                    |
+> | `200`       | `{"ping": ping, "duration": number}`                     |
 > | `500`       | `{"type": "error", "message": "Internal server error."}` |
 </details>
 
@@ -41,7 +41,7 @@
 #### Responses
 > | Código HTTP | Respuesta                                                |
 > | ----------- | -------------------------------------------------------- |
-> | `200`       | `{"netInfo": netInfo}`                                   |
+> | `200`       | `{"info": info}`                                   |
 > | `500`       | `{"type": "error", "message": "Internal server error."}` |
 </details>
 
@@ -58,8 +58,8 @@
 > | `ip`   | `string` | Dirección IP a consultar. |
 
 #### Responses
-> | Código HTTP | Respuesta                                                |
-> | ----------- | -------------------------------------------------------- |
-> | `200`       | `{"netInfo": netInfo}`                                   |
-> | `500`       | `{"type": "error", "message": "Internal server error."}` |
+> | Código HTTP | Respuesta                                                                           |
+> | ----------- | ----------------------------------------------------------------------------------- |
+> | `200`       | `{"ip": string, "mac": string, "hostname": string, user: string, duration: number}` |
+> | `500`       | `{"type": "error", "message": "Internal server error."}`                            |
 </details>
