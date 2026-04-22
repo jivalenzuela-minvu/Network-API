@@ -11,9 +11,7 @@ import ping from "ping"
 export const getHostname = (stdout) => {
     const splittedStdout = stdout.split("<20>")[0].split(" ").filter((_) => _)
 
-    const findedHostname = splittedStdout[splittedStdout.length - 1]
-
-    const hostname = (findedHostname.includes("encontrado")) ? "-" : findedHostname
+    const hostname = splittedStdout[splittedStdout.length - 1].includes("encontrado") ? "-" : splittedStdout[splittedStdout.length - 1]
 
     return hostname
 }
@@ -47,11 +45,11 @@ export const getUser = (stdout) => {
  */
 export const getIpInfo = (ip) => new Promise((resolve) => {
     const start = performance.now()
-    
+
     execFile("nbtstat", ["-A", ip], { timeout: 30000 }, (error, stdout) => {
         if (error) {
             resolve({ ip, mac: "-", hostname: "-", user: "-" })
-            
+
             return
         }
 
@@ -60,7 +58,7 @@ export const getIpInfo = (ip) => new Promise((resolve) => {
 
         if (mac === "-" || hostname === "-") {
             resolve({ ip, mac, hostname, user: "-" })
-            
+
             return
         }
 
