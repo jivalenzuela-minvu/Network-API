@@ -9,9 +9,11 @@ import ping from "ping"
  * @param {string} stdout Salida del comando.
  */
 export const getHostname = (stdout) => {
-    const splittedStdout = stdout.split("<20>")[0].split(" ").filter((_) => _)
+    const splittedStdout = stdout.split("<20>")[0].split(" ").filter(Boolean)
 
-    const hostname = splittedStdout[splittedStdout.length - 1].includes("encontrado") ? "-" : splittedStdout[splittedStdout.length - 1]
+    const findedHostname = splittedStdout[splittedStdout.length - 1]
+
+    const hostname = (findedHostname?.includes("encontrado")) ? "-" : findedHostname
 
     return hostname
 }
